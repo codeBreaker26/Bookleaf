@@ -189,3 +189,54 @@ export const assignTicket = async (
     });
   }
 };
+
+
+
+export const generateAIDraftResponse =
+  async (
+    req: AuthRequest,
+    res: Response
+  ) => {
+    try {
+      const ticket = await Ticket.findById(
+        req.params.id
+      );
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      // MOCK AI RESPONSE
+      const aiDraft = `
+Hello,
+
+We have received your issue regarding "${ticket.subject}".
+
+Our support team is currently reviewing the matter and will get back to you shortly.
+
+Thank you for your patience.
+
+Regards,
+BookLeaf Support Team
+`;
+
+      ticket.aiDraftResponse = aiDraft;
+
+      await ticket.save();
+
+      res.status(200).json({
+        message:
+          "AI draft generated successfully",
+
+        aiDraft,
+      });
+    } catch (error) {
+      console.log(error);
+
+      res.status(500).json({
+        message: "Server Error",
+      });
+    }
+  };

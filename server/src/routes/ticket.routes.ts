@@ -6,6 +6,7 @@ import {
   addMessageToTicket,
   updateTicketStatus,
   assignTicket,
+  generateAIDraftResponse,
 } from "../controllers/ticket.controller";
 import { adminOnly } from "../middleware/role.middleware";
 
@@ -37,4 +38,11 @@ router.put(
   assignTicket
 );
 
+
+router.post(
+  "/:id/ai-response",
+  protect,
+  adminOnly,
+  generateAIDraftResponse
+);
 export default router;
