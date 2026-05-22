@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-
+import { analyzeTicket } from "../services/ai.service";
 import Ticket from "../models/Ticket";
 
 interface AuthRequest extends Request {
@@ -13,23 +13,28 @@ export const createTicket = async (
 ) => {
   try {
     const {
-      subject,
-      description,
-      category,
-      priority,
-      book,
+    subject,
+    description,
+    book,
     } = req.body;
 
-    const ticket = await Ticket.create({
-      subject,
-      description,
-      category,
-      priority,
-      book,
+    const aiAnalysis = await analyzeTicket(
+  subject,
+  description
+);
 
-      author: req.user._id,
-    });
+const ticket = await Ticket.create({
+  subject,
+  description,
+  book,
 
+  category: aiAnalysis.category,
+  priority: aiAnalysis.priority,
+  aiDraftResponse:
+    aiAnalysis.draftResponse,
+
+  author: req.user._id,
+});
     res.status(201).json({
       message: "Ticket created successfully",
       ticket,
@@ -42,6 +47,11 @@ export const createTicket = async (
     });
   }
 };
+
+
+
+
+
 
 // GET ALL TICKETS
 // GET ALL TICKETS

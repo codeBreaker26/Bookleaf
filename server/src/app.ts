@@ -1,13 +1,13 @@
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import connectDB from "./config/db";
 import adminRoutes from "./routes/admin.routes";
 import bookRoutes from "./routes/book.routes";
 import ticketRoutes from "./routes/ticket.routes";
-dotenv.config();
 
 connectDB();
 

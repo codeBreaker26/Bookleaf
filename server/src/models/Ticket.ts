@@ -47,7 +47,7 @@ const ticketSchema = new mongoose.Schema(
       type: String,
       enum: [
         "Royalty & Payments",
-        "ISBN & Metadata",
+        "ISBN & Metadata Issues",
         "Printing & Quality",
         "Distribution & Availability",
         "Book Status & Production Updates",
@@ -77,7 +77,23 @@ const ticketSchema = new mongoose.Schema(
       ref: "User",
     },
 
-    internalNotes: [String],
+   internalNotes: [
+  {
+    message: {
+      type: String,
+    },
+
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
+    createdAt: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+],
 
     messages: [messageSchema],
   },
