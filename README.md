@@ -153,12 +153,12 @@ Use these credentials to explore the application locally.
 
 ```text
 Admin user:
-Email: admin@example.com
-Password: password123
+Email: admin2@gmail.com
+Password: admin123
 
 Author user:
-Email: author@example.com
-Password: password123
+Email: ishan@gmail.com
+Password: 123456
 ```
 
 > Update these values with seeded or actual test credentials used in your environment.
