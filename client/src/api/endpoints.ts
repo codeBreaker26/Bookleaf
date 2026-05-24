@@ -12,5 +12,10 @@ export const API_ENDPOINTS = {
   },
   tickets: {
     list: '/tickets',
+    create: '/tickets',
+    detail: (id: string) => `/tickets/${id}`,
+  },
+  books: {
+    list: '/books',
   },
 };

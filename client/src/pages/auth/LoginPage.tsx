@@ -1,8 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "@hooks/useAuth";
 import api from "@api/axios";
 import { setAuthToken } from "@utils/storage";
+import { LoadingSpinner } from "@components/common/LoadingSpinner";
+
+function getHomePath(role?: string) {
+  const normalizedRole = role?.toLowerCase();
+  if (normalizedRole === "author") {
+    return "/author";
+  }
+  return "/admin";
+}
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -10,34 +19,37 @@ export function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
+
+  if (auth?.isInitializing) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (auth?.isAuthenticated) {
+    return <Navigate to={getHomePath(auth.user?.role)} replace />;
+  }
 
   const handleLogin = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await api.post(
-        "/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+      const response = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
       const { user, token } = response.data;
       setAuthToken(token);
       await auth.login(user, token);
-
-      navigate("/admin");
+      navigate(getHomePath(user?.role), { replace: true });
     } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-          "Login failed"
-      );
+      setError(err.response?.data?.message || "Login failed");
     } finally {
       setLoading(false);
     }
@@ -47,13 +59,9 @@ export function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4">
       <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-8 shadow-xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-white">
-            Welcome Back
-          </h1>
-
+          <h1 className="text-3xl font-semibold text-white">Welcome Back</h1>
           <p className="mt-2 text-sm text-slate-400">
-            Sign in to access the BookLeaf
-            support portal.
+            Sign in to access the BookLeaf support portal.
           </p>
         </div>
 
@@ -65,51 +73,35 @@ export function LoginPage() {
           }}
         >
           <div>
-            <label className="block text-sm font-medium text-slate-300">
-              Email
-            </label>
-
+            <label className="block text-sm font-medium text-slate-300">Email</label>
             <input
               type="email"
               value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="Enter your email"
               className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 outline-none transition focus:border-violet-500"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300">
-              Password
-            </label>
-
+            <label className="block text-sm font-medium text-slate-300">Password</label>
             <input
               type="password"
               value={password}
-              onChange={(event) =>
-                setPassword(event.target.value)
-              }
+              onChange={(event) => setPassword(event.target.value)}
               placeholder="Enter your password"
               className="mt-2 w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3 text-white placeholder-slate-500 outline-none transition focus:border-violet-500"
             />
           </div>
 
-          {error && (
-            <p className="text-sm text-red-500">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
             className="w-full rounded-xl bg-violet-600 px-4 py-3 font-medium text-white transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading
-              ? "Signing in..."
-              : "Continue"}
+            {loading ? "Signing in..." : "Continue"}
           </button>
         </form>
       </div>

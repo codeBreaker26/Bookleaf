@@ -56,7 +56,7 @@ const ticket = await Ticket.create({
 // GET ALL TICKETS
 // GET ALL TICKETS
 export const getTickets = async (
-  req: Request,
+  req: AuthRequest,
   res: Response
 ) => {
   try {
@@ -70,6 +70,10 @@ export const getTickets = async (
 
     if (priority) {
       filter.priority = priority;
+    }
+
+    if (req.user && req.user.role !== "admin") {
+      filter.author = req.user._id;
     }
 
     const tickets = await Ticket.find(filter)

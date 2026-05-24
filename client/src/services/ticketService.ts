@@ -31,8 +31,19 @@ export interface TicketDetailApiItem extends TicketApiItem {
   aiDraftResponse?: string;
 }
 
+export interface CreateTicketPayload {
+  subject: string;
+  description: string;
+  book?: string;
+}
+
 export async function getTickets() {
   const response = await api.get<TicketApiItem[]>(API_ENDPOINTS.tickets.list);
+  return response.data;
+}
+
+export async function createTicket(payload: CreateTicketPayload) {
+  const response = await api.post(API_ENDPOINTS.tickets.create, payload);
   return response.data;
 }
 

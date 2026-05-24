@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, BookOpen, CheckCircle2, MessageCircle, Sparkles, Users } from 'lucide-react';
-import { getDashboardStats, getRecentTickets, type DashboardStats, type DashboardTicket } from '@services/adminService';
+import { getRecentTickets, type DashboardTicket } from '@services/adminService';
 import { LoadingSpinner } from '@components/common/LoadingSpinner';
 import { EmptyState } from '@components/common/EmptyState';
 import { TicketTableRow, type TicketItem } from '@components/TicketTableRow';
@@ -32,7 +32,7 @@ function formatTicket(ticket: DashboardTicket): TicketItem {
 
 export function AdminDashboardPage() {
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [stats, setStats] = useState<any | null>(null);
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,9 +43,47 @@ export function AdminDashboardPage() {
       setError(null);
 
       try {
-        const [dashboardData, ticketsData] = await Promise.all([getDashboardStats(), getRecentTickets()]);
+        const ticketsData = await getRecentTickets();
+
+        // Defensive: ensure we have an array
+        const ticketsArray = Array.isArray(ticketsData) ? ticketsData : [];
+
+        // compute stats from tickets
+        const totalTickets = ticketsArray.length;
+        const openStatuses = new Set(['Open', 'In Progress', 'Pending']);
+        const resolvedStatuses = new Set(['Resolved', 'Closed']);
+
+        let openTickets = 0;
+        let resolvedTickets = 0;
+        const authors = new Set<string>();
+
+        for (const t of ticketsArray) {
+          const status = (t && t.status) || '';
+          if (openStatuses.has(status)) openTickets += 1;
+          if (resolvedStatuses.has(status)) resolvedTickets += 1;
+
+          const authorName = typeof t.author === 'string' ? t.author : t.author?.name ?? '';
+          if (authorName) authors.add(authorName);
+        }
+
+        const dashboardData = {
+          totalBooks: 0,
+          totalTickets,
+          openTickets,
+          resolvedTickets,
+          totalAuthors: authors.size,
+          totalRoyalty: 0,
+        };
+
         setStats(dashboardData);
-        setTickets(ticketsData.slice(0, 5).map(formatTicket));
+        // sort recent by createdAt (newest first) defensively
+        const sorted = ticketsArray.slice().sort((a, b) => {
+          const ta = a?.createdAt ? Date.parse(a.createdAt) : 0;
+          const tb = b?.createdAt ? Date.parse(b.createdAt) : 0;
+          return tb - ta;
+        });
+
+        setTickets(sorted.slice(0, 5).map(formatTicket));
       } catch (err) {
         setError('Unable to load dashboard data. Please try again later.');
       } finally {
