@@ -138,15 +138,6 @@ Open the application in your browser at the URL provided by Vite.
 - `/login`
 - `/`
 
-## Screenshots
-
-> Add screenshots here once the UI is available.
-
-- Dashboard overview
-- Ticket details page
-- Author portal ticket list
-- Login page
-
 ## Demo Credentials
 
 Use these credentials to explore the application locally.
